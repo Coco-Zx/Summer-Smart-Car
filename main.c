@@ -101,6 +101,13 @@ int main (void)
     while(1)
     {
         Scan_Key();
+		if(mt9v03x_finish_flag)
+		{
+			memcpy(image_copy, mt9v03x_image, MT9V03X_H*MT9V03X_W);
+			ips200_show_gray_image(0, 0, (const uint8 *)image_copy, MT9V03X_W, MT9V03X_H, MT9V03X_W, MT9V03X_H, 0);
+			mt9v03x_finish_flag=0;
+		}
+		
     }
 }
 
@@ -110,6 +117,19 @@ void All_Init(){
 	system_delay_ms(300);
 	ips200_init(IPS200_TYPE_SPI);                                               //ips初始化
 	//摄像头初始化
+	while(1)
+    {
+        if(mt9v03x_init())
+        {
+            ips200_show_string(0, 16, "mt9v03x reinit.");
+        }
+        else
+        {
+            break;
+        }
+        system_delay_ms(500);                                                   // 短延时快速闪灯表示异常
+    }
+        system_delay_ms(500);
 	ips200_show_string(0, 16, "init success.");
 	system_delay_ms(1000);  
 	gpio_init(KEY1, GPI, GPIO_HIGH, GPI_PULL_UP);                               // 初始化 KEY1 输入 默认高电平 上拉输入
@@ -200,30 +220,31 @@ void Scan_Key(){
 
 void Dis_CD0(){
 	
-			ips200_show_string(10, 132, "MainMenu");
+			ips200_show_string(10, 132, "MainMenu  ");
 			ips200_show_string(0, 164, ">");
-			ips200_show_string(10, 164, "Cargo   ");
-			ips200_show_string(10, 180, "Mode    ");
-			ips200_show_string(10, 196, "View    ");
-			ips200_show_string(10, 212, "Setting ");
+			ips200_show_string(10, 164, "Cargo     ");
+			ips200_show_string(10, 180, "Mode      ");
+			ips200_show_string(10, 196, "View      ");
+			ips200_show_string(10, 212, "Setting   ");
 		
 }
 void Dis_CD1(){
 	
-			ips200_show_string(10, 132, "MODE    ");
+			ips200_show_string(10, 132, "MODE      ");
 			ips200_show_string(0, 164, ">");
-			ips200_show_string(10, 164, "Mode1   ");
-			ips200_show_string(10, 180, "Mode2   ");
-			ips200_show_string(10, 196, "Mode3   ");
+			ips200_show_string(10, 164, "Mode1     ");
+			ips200_show_string(10, 180, "Mode2     ");
+			ips200_show_string(10, 196, "Mode3     ");
+			ips200_show_string(10, 212, "          ");
 }
 void Dis_CD2(){
 	
-			ips200_show_string(10, 132, "Setting ");
+			ips200_show_string(10, 132, "Setting   ");
 			ips200_show_string(0, 164, ">");
-			ips200_show_string(10, 164, "Kp=     ");
-			ips200_show_string(10, 180, "Ki=     ");
-			ips200_show_string(10, 196, "Kd=     ");
-			ips200_show_string(10, 212, "Speed=  ");
+			ips200_show_string(10, 164, "Kp=       ");
+			ips200_show_string(10, 180, "Ki=       ");
+			ips200_show_string(10, 196, "Kd=       ");
+			ips200_show_string(10, 212, "Speed=    ");
 	
 			ips200_show_int (70, 164,Kp,2);
 			ips200_show_int (70, 180,Ki,2);
@@ -233,12 +254,12 @@ void Dis_CD2(){
 }
 void Dis_CD3(){
 	
-			ips200_show_string(10, 132, "Setting ");
+			ips200_show_string(10, 132, "Setting   ");
 			ips200_show_string(0, 164, ">");
-			ips200_show_string(10, 164, "Kp=     ");
-			ips200_show_string(10, 180, "Ki=     ");
-			ips200_show_string(10, 196, "Kd=     ");
-			ips200_show_string(10, 212, "Speed=  ");
+			ips200_show_string(10, 164, "Kp=       ");
+			ips200_show_string(10, 180, "Ki=       ");
+			ips200_show_string(10, 196, "Kd=       ");
+			ips200_show_string(10, 212, "Speed=    ");
 		
 			ips200_show_int (70, 164,Kp,2);
 			ips200_show_int (70, 180,Ki,2);

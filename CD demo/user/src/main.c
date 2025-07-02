@@ -74,17 +74,19 @@
 #define SWITCH2                 (D4 )
 
 int8 offset=0;
-uint8_t T_Counter=0;
-int G_Num=1;
-char C_Num=0;
-char CS_GB=0;
-char CS_Change_Flag=0;
+uint8_t T_Counter=0;//定时器计数
+int G_Num=1;//光标位置
+char C_Num=0;//菜单页码
+char CS_GB=0;//光标参数
+char CS_Change_Flag=0;//参数改变标志位
 
+//参数声明
 int Kp=50;
 int Ki=40;
 int Kd=30;
 int Speed=20;
 
+//函数声明
 void All_Init();
 void Scan_Key();
 void Dis_CD0();
@@ -168,17 +170,43 @@ void Scan_Key(){
 	if(!gpio_get_level(KEY2)) {
 		system_delay_ms(100);
 		if(!gpio_get_level(KEY2)) {
-			G_Num++;
-			if(G_Num > Max){G_Num=1;}
+			if(CS_Change_Flag==0){
+				G_Num++;
+				if(G_Num > Max)
+				{
+					G_Num=1;
+				}
+			}
+			else if(CS_Change_Flag==1){
+				switch(G_Num){
+					case 1:Kp--;ips200_show_int (70, 164,Kp,2);break;
+					case 2:Ki--;ips200_show_int (70, 180,Ki,2);break;
+					case 3:Kd--;ips200_show_int (70, 196,Kd,2);break;
+					case 4:Speed--;ips200_show_int (70, 212,Speed,2);break;
+				}
+			}
 		}
-		}
+	}
 	if(!gpio_get_level(KEY1)) {
 		system_delay_ms(100);
 		if(!gpio_get_level(KEY1)) {
-			G_Num--;
-			if(G_Num < 1){G_Num=Max;}
+			if(CS_Change_Flag==0){
+				G_Num--;
+				if(G_Num <1)
+				{
+					G_Num=Max;
+				}
+			}
+			else if(CS_Change_Flag==1){
+				switch(G_Num){
+					case 1:Kp++;ips200_show_int (70, 164,Kp,2);break;
+					case 2:Ki++;ips200_show_int (70, 180,Ki,2);break;
+					case 3:Kd++;ips200_show_int (70, 196,Kd,2);break;
+					case 4:Speed++;ips200_show_int (70, 212,Speed,2);break;
+				}
+			}
 		}
-		}
+	}
 	if(!gpio_get_level(KEY4)) {
 		system_delay_ms(100);
 		if(!gpio_get_level(KEY4)) {
@@ -195,7 +223,7 @@ void Scan_Key(){
 				case 0:
 				{
 					switch(G_Num){
-						case 1:ips200_show_string(0, 0, " GO!");break;
+						case 1:ips200_show_string(0, 300, " GO!");break;
 						case 2:C_Num=1;ips200_full(RGB565_WHITE);Dis_CD1();G_Num=1;break;
 						case 3:C_Num=2;ips200_full(RGB565_WHITE);Dis_CD2();G_Num=1;break;
 						case 4:C_Num=3;ips200_full(RGB565_WHITE);Dis_CD3();G_Num=1;break;
@@ -203,11 +231,19 @@ void Scan_Key(){
 				}break;
 				case 3:
 				{
+					
+					if(CS_Change_Flag==0){
+						
 					switch(G_Num){
-						case 1:ips200_show_string(0, 0, " GO!");break;
-						case 2:C_Num=1;break;
-						case 3:C_Num=2;break;
-						case 4:C_Num=3;ips200_clear();Dis_CD3();G_Num=1;break;
+						case 1:CS_Change_Flag=1;break;
+						case 2:CS_Change_Flag=1;break;
+						case 3:CS_Change_Flag=1;break;
+						case 4:CS_Change_Flag=1;break;
+					}
+				}
+					else{
+						CS_Change_Flag=0;
+						
 					}
 				}break;
 				
@@ -238,7 +274,7 @@ void Dis_CD1(){
 			ips200_show_string(10, 212, "          ");
 }
 void Dis_CD2(){
-	
+			
 			ips200_show_string(10, 132, "Setting   ");
 			ips200_show_string(0, 164, ">");
 			ips200_show_string(10, 164, "Kp=       ");
@@ -280,10 +316,13 @@ void Dis_GB(){
 		}break;
 		case 1:
 		{
-			ips200_show_string(0, 164, " ");
-			ips200_show_string(0, 180, " ");
-			ips200_show_string(0, 196, " ");
-			ips200_show_string(0, 148+16*G_Num, ">");
+			
+				
+				ips200_show_string(0, 164, " ");
+				ips200_show_string(0, 180, " ");
+				ips200_show_string(0, 196, " ");
+				ips200_show_string(0, 148+16*G_Num, ">");
+		
 		}break;
 		case 2:
 		{
@@ -299,7 +338,12 @@ void Dis_GB(){
 			ips200_show_string(0, 180, " ");
 			ips200_show_string(0, 196, " ");
 			ips200_show_string(0, 212, " ");
-			ips200_show_string(0, 148+16*G_Num, ">");
+			if(CS_Change_Flag==1){
+				ips200_show_string(0, 148+16*G_Num, "!");
+			}
+			else{
+				ips200_show_string(0, 148+16*G_Num, ">");
+			}
 		}break;
 	}
 }
